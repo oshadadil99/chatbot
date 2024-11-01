@@ -1,8 +1,19 @@
 import streamlit as st
 import streamlit_chat as message
 from dotenv import load_dotenv
+import os
 
-def main():
+from langchain_community.llms import HuggingFaceHub
+#from langchain.chat_models import ChatModel
+from langchain_community.chat_models import ChatModel
+
+from langchain.schemas import (
+      SystemMessage,
+      HumanMessage,
+      AIMessage
+)
+
+def init():
     load_dotenv()
 
     if os.getenv("HUGGINGFACE_API_KEY") is None or os.getenv("HUGGINGFACE_API_KEY") == "":
@@ -17,11 +28,11 @@ def main():
             page_icon="</>"
     )
 
+
+def main():
+    init()
+   
     st.header("Ask from Prince Vlad")
-
-    message("Hello how are you")
-    message("I'm good", is_user=True)
-
     with st.sidebar:
         user_input = st.text_input("Your Message: ",key="user_input")
 
