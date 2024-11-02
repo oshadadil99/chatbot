@@ -5,7 +5,12 @@ import os
 
 from langchain_community.llms import HuggingFaceHub
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain  # Use LLMChain for chaining prompts and models
+from langchain.chains import LLMChain  
+from langchain.schema import (
+    SystemMessage,
+    HumanMessage,
+    AIMessage
+)
 
 def init():
     load_dotenv()
@@ -26,13 +31,25 @@ def init():
 def main():
     init()
 
+    if "messages" not in st.session_state:
+        st.session_state.messages = [SystemMessage(content="You are a helpful assistant.")]
+
     st.header("Ask from Prince Vlad")
 
     with st.sidebar:
         user_input = st.text_input("Your Message: ",key="user_input")
 
+    
+    for i, msg in enumerate(st.session_state.messages):
+        if isinstance(msg, HumanMessage):
+            message.message(msg.content, is_user=True, key=f"user_{i}")
+        elif isinstance(msg, AIMessage):
+            message.message("Prince Vlad: " + msg.content, is_user=False, key=f"ai_{i}")
+
+
     if user_input:
 
+        st.session_state.messages.append(HumanMessage(user_input))
         hf_api_token = os.getenv("HUGGINGFACE_API_KEY")
         model_name = "mistralai/Mistral-7B-Instruct-v0.3"
         
@@ -50,9 +67,11 @@ def main():
             llm=llm,
             prompt=prompt
         )
-
+    
         with st.spinner("Thinking...."):
             response = chat_chain.run(user_input=user_input)
+        st.session_state.messages.append(AIMessage(response))
+
         message.message(user_input, is_user=True)
         message.message("Prince Vlad: " + response, is_user=False)
 
